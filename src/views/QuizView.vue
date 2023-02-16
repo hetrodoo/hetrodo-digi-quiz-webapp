@@ -90,6 +90,10 @@ export default class HomeView extends Vue {
 
   async confirm () {
     if (['', null, undefined].includes(this.response)) {
+      const el: HTMLElement = (this.$refs.form as Vue).$el
+
+      el.classList.add('shake')
+      setTimeout(() => el.classList.remove('shake'), 251)
       return
     }
 
@@ -138,4 +142,15 @@ export default class HomeView extends Vue {
   color: rgba(0, 0, 0, 0.75)
   margin-bottom: 1em
   overflow-wrap: break-word
+
+.shake
+  animation: shake 250ms cubic-bezier(.36,.07,.19,.97) forwards
+
+@keyframes shake
+  0%, 100%
+    transform: translateX(0)
+  25%
+    transform: translateX(-2.5%)
+  50%
+    transform: translateX(2.5%)
 </style>
