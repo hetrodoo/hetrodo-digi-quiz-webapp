@@ -1,4 +1,9 @@
 <template>
+  <qs-overlay v-if="store.getters.GET_IS_LOADING">
+    <qs-loading />
+    <span style="margin-top: 2em">Warming up the API, this might take a while...</span>
+  </qs-overlay>
+
   <router-view />
 </template>
 
@@ -18,4 +23,9 @@ body, html
 </style>
 
 <script setup lang="ts">
+import QsOverlay from '@/components/primitives/qsOverlay.vue'
+import QsLoading from '@/components/primitives/qsLoading.vue'
+import { useStore } from 'vuex'
+
+const store = useStore()
 </script>

@@ -24,6 +24,9 @@ export default createStore({
     },
     GET_CORRECT_ANSWERS_COUNT (state) {
       return state.correctAnswersCount
+    },
+    GET_IS_LOADING (state) {
+      return state.isLoading
     }
   },
   mutations: {
