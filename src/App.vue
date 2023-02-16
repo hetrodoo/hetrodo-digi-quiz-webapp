@@ -1,16 +1,5 @@
 <template>
-  <qs-container absolute>
-    <qs-button
-      background-color="var(--secondary)"
-      color="#FFF"
-    >
-      Avançar
-    </qs-button>
-
-    <qs-progress :progress="25" />
-
-    <router-view/>
-  </qs-container>
+  <router-view />
 </template>
 
 <style lang="sass">
@@ -27,8 +16,6 @@ body, html
   min-width: 100%
   min-height: 100%
 </style>
+
 <script setup lang="ts">
-import QsButton from '@/components/primitives/qsButton.vue'
-import QsContainer from '@/components/primitives/qsContainer.vue'
-import QsProgress from '@/components/primitives/qsProgress.vue'
 </script>
