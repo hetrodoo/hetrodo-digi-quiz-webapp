@@ -48,6 +48,7 @@ export default createStore({
       store.commit('SET_IS_LOADING', false)
       store.commit('SET_QUESTIONS', [])
       store.commit('SET_CURRENT_QUESTION', 0)
+      store.commit('SET_CORRECT_ANSWERS_COUNT', 0)
     },
     async LOAD_QUIZ (store, quizId) {
       try {
