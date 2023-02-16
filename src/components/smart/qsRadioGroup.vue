@@ -47,6 +47,7 @@ export default class QsRadioGroup extends Vue {
 
   reset () {
     this.form?.reset()
+    this.$emit('value', undefined)
   }
 }
 
