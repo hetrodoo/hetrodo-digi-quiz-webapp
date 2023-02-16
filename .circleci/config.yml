@@ -8,7 +8,7 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints:
-            - "08:2a:b7:5d:60:ef:64:84:b8:95:9e:28:f5:a2:76:ba"
+            - "ff:51:98:2e:24:28:d8:09:a2:87:a8:b1:86:5b:71:23"
       - restore_cache:
           key: v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
       - run:
