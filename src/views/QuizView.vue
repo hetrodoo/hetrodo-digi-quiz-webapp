@@ -10,23 +10,13 @@
 
     <div class="body">{{ question }}</div>
 
-    <form name="quiz">
-      <div class="alternatives">
-          <div
-            class="alternative"
-            v-for="(item, index) in answers"
-            :key="index"
-          >
-            <input
-              name="answer"
-              type="radio"
-              :value="item"
-              :id="`${item}-${index}`"
-            >
-            <label :for="`${item}-${index}`"> {{ item }} </label>
-          </div>
-      </div>
-    </form>
+    <qs-radio-group
+      :items="answers"
+      name="quiz"
+      @value="response = arguments[0]"
+      ref="form"
+    />
+
     <qs-button
       background-color="var(--secondary)"
       color="#FFF"
@@ -47,14 +37,17 @@ import QsButton from '@/components/primitives/qsButton.vue'
 import IQuiz from '@/api/models/quiz/IQuiz'
 import shuffleArray from '@/utils/ShuffleArray'
 import parseBoolean from '@/utils/parseBoolean'
+import QsRadioGroup from '@/components/smart/qsRadioGroup.vue'
 
 @Options({
-  components: { QsButton, QsProgress, QsContainer }
+  components: { QsRadioGroup, QsButton, QsProgress, QsContainer }
 })
 export default class HomeView extends Vue {
   private readonly store = useStore()
 
   private readonly router = useRouter()
+
+  private response = ''
 
   get correctAnswersCount (): number {
     return this.store.getters.GET_CORRECT_ANSWERS_COUNT
@@ -96,32 +89,25 @@ export default class HomeView extends Vue {
   }
 
   async confirm () {
-    const form: HTMLFormElement | null = document.forms.namedItem('quiz')
-    const response = form?.answer.value
-
-    if (['', null, undefined].includes(response)) {
+    if (['', null, undefined].includes(this.response)) {
       return
     }
 
     const correctResponse = decodeURIComponent(this.currentQuestion?.correctAnswer || '')
+    const isCorrect: boolean = (() => {
+      if (this.currentQuestion?.type === 'multiple') {
+        return this.response === correctResponse
+      }
 
-    const radio = [...form?.answer].find(el => (el as HTMLInputElement).value === response) as HTMLInputElement
-    let isCorrect
+      if (this.currentQuestion?.type === 'boolean') {
+        return parseBoolean(this.response) === parseBoolean(correctResponse)
+      }
 
-    if (this.currentQuestion?.type === 'multiple') {
-      isCorrect = response === correctResponse
-    } else if (this.currentQuestion?.type === 'boolean') {
-      isCorrect = parseBoolean(response) === parseBoolean(correctResponse)
-    }
+      throw new Error('Unknown question type')
+    })()
 
-    if (isCorrect) {
-      radio.classList.add('correct')
-      await this.store.dispatch('ADD_CORRECT_ANSWER')
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 250))
-    radio.classList.remove('correct')
-    form?.reset()
+    isCorrect && (await this.store.dispatch('ADD_CORRECT_ANSWER'));
+    (this.$refs.form as QsRadioGroup).reset()
 
     if (!await this.store.dispatch('NEXT_QUESTION')) {
       const percentage = Math.round((this.correctAnswersCount / this.questions.length) * 100)
@@ -152,29 +138,4 @@ export default class HomeView extends Vue {
   color: rgba(0, 0, 0, 0.75)
   margin-bottom: 1em
   overflow-wrap: break-word
-
-.alternatives
-  display: flex
-  flex-direction: column
-  gap: 1em
-  margin-bottom: 1em
-
-  .alternative
-    input[type=radio]
-      appearance: none
-      height: 1em
-      width: 1em
-      margin: 0 1em 0 0
-      border: 1px solid var(--secondary)
-      border-radius: 100%
-      background-color: transparent
-      transition: background-color 125ms ease-in-out
-
-      &:checked
-        background-color: var(--secondary)
-
-      &.correct
-        background-color: #56E527FF
-        border: 1px solid #56E527FF
-
 </style>
