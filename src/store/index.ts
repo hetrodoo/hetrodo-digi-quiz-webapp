@@ -5,7 +5,8 @@ export default createStore({
   state: {
     questions: [],
     currentQuestion: -1,
-    isLoading: false
+    isLoading: false,
+    correctAnswersCount: 0
   },
   getters: {
     GET_QUESTIONS (state) {
@@ -20,6 +21,9 @@ export default createStore({
     },
     GET_CURRENT_QUESTION_INDEX (state) {
       return state.currentQuestion
+    },
+    GET_CORRECT_ANSWERS_COUNT (state) {
+      return state.correctAnswersCount
     }
   },
   mutations: {
@@ -31,6 +35,9 @@ export default createStore({
     },
     SET_IS_LOADING (state, isLoading) {
       state.isLoading = isLoading
+    },
+    SET_CORRECT_ANSWERS_COUNT (state, count) {
+      state.correctAnswersCount = count
     }
   },
   actions: {
@@ -53,11 +60,14 @@ export default createStore({
     },
     NEXT_QUESTION (store) {
       if ((store.getters.GET_CURRENT_QUESTION_INDEX + 1) === store.getters.GET_QUESTIONS.length) {
-        store.dispatch('RESET')
-        return
+        return false
       }
 
       store.commit('SET_CURRENT_QUESTION', store.getters.GET_CURRENT_QUESTION_INDEX + 1)
+      return true
+    },
+    ADD_CORRECT_ANSWER (store) {
+      store.commit('SET_CORRECT_ANSWERS_COUNT', store.getters.GET_CORRECT_ANSWERS_COUNT + 1)
     }
   },
   modules: {

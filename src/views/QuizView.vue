@@ -38,6 +38,7 @@
 </template>
 
 <script lang="ts">
+import { useRouter } from 'vue-router'
 import { useStore } from 'vuex'
 import { Options, Vue } from 'vue-class-component'
 import QsContainer from '@/components/primitives/qsContainer.vue'
@@ -52,6 +53,12 @@ import parseBoolean from '@/utils/parseBoolean'
 })
 export default class HomeView extends Vue {
   private readonly store = useStore()
+
+  private readonly router = useRouter()
+
+  get correctAnswersCount (): number {
+    return this.store.getters.GET_CORRECT_ANSWERS_COUNT
+  }
 
   get questions (): IQuiz[] {
     return this.store.getters.GET_QUESTIONS
@@ -109,13 +116,17 @@ export default class HomeView extends Vue {
 
     if (isCorrect) {
       radio.classList.add('correct')
+      await this.store.dispatch('ADD_CORRECT_ANSWER')
     }
 
     await new Promise((resolve) => setTimeout(resolve, 250))
     radio.classList.remove('correct')
     form?.reset()
 
-    await this.store.dispatch('NEXT_QUESTION')
+    if (!await this.store.dispatch('NEXT_QUESTION')) {
+      const percentage = Math.round((this.correctAnswersCount / this.questions.length) * 100)
+      await this.router.push(`/result/${percentage}`)
+    }
   }
 
   mounted () {
