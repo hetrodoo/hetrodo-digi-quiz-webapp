@@ -1,0 +1,55 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: cimg/node:16.13
+    working_directory: ~/project
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "08:2a:b7:5d:60:ef:64:84:b8:95:9e:28:f5:a2:76:ba"
+      - restore_cache:
+          key: v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
+      - run:
+          name: "Install"
+          command: |
+            yarn install
+      - save_cache:
+          key: v1-{{ .Branch }}-{{ checksum "yarn.lock" }}
+          paths:
+            - "node_modules"
+      - run:
+          name: "Build"
+          command: |
+            yarn build
+      - run:
+          name: "Zip artifacts"
+          command: |
+            cd ~/project/dist
+            zip -r dist.zip ./
+      - run:
+          name: "Deploy"
+          command: |
+            export GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"
+            git config --global user.email "circleci@hetrodo.dev"
+            git config --global user.name "CircleCI"
+
+            git clone git@github.com:hetrodoo/hetrodo-nginx-docker.git remote
+
+            rm -rf ~/project/remote/var/www/$CIRCLE_PROJECT_REPONAME
+            mkdir ~/project/remote/var/www/$CIRCLE_PROJECT_REPONAME
+            cd ~/project/remote/var/www/$CIRCLE_PROJECT_REPONAME
+
+            mv ~/project/dist/dist.zip .
+            unzip dist.zip
+            unlink dist.zip
+
+            cd ~/project/remote
+            git add .
+            git commit -m "[CircleCI]: Deploy $CIRCLE_PROJECT_REPONAME@$CIRCLE_BUILD_NUM"
+            git push origin master
+workflows:
+  build:
+    jobs:
+      - build
