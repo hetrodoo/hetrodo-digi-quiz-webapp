@@ -26,4 +26,5 @@ const props = defineProps<{
     height: 8px
     border-radius: 8px
     background-color: var(--secondary)
+    transition: width 250ms ease-in-out
 </style>
